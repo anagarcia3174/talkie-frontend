@@ -1,15 +1,16 @@
 {
   "expo": {
-    "name": "talkie-frontend",
-    "slug": "talkie-frontend",
+    "name": "talkie_frontend",
+    "slug": "talkie_frontend",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "talkiefrontend",
+    "scheme": "gettalkie",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "app.gettalkie",
+      "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -37,7 +38,14 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
-      ]
+      ],
+      "expo-secure-store",
+      "expo-web-browser",
+      ["@react-native-google-signin/google-signin",
+    {"iosUrlScheme": "com.googleusercontent.apps.814998844911-bcvtmhk7gk1okhq7t16inc39hji3ke9e"
+  
+  }
+    ]
     ],
     "experiments": {
       "typedRoutes": true,
