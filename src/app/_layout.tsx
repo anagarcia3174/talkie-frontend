@@ -1,4 +1,5 @@
 import { Stack } from "expo-router";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   useFonts,
   BigShouldersDisplay_900Black,
@@ -15,10 +16,11 @@ import {
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 
-export default function RootLayout() {
-  SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync();
 
-  // inside RootLayout:
+const queryClient = new QueryClient();
+
+export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     BigShouldersDisplay_900Black,
     SpaceGrotesk_400Regular,
@@ -34,5 +36,9 @@ export default function RootLayout() {
 
   if (!fontsLoaded) return null;
 
-  return <Stack />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Stack />
+    </QueryClientProvider>
+  );
 }
