@@ -4,8 +4,10 @@
   "version": "1.0.0",
   "dependencies": {
     "@expo/ui": "~57.0.18",
+    "@react-native-async-storage/async-storage": "^3.1.1",
     "@react-native-google-signin/google-signin": "^16.1.5",
     "@supabase/supabase-js": "^2.116.0",
+    "aes-js": "^3.1.2",
     "expo": "~57.0.22",
     "expo-apple-authentication": "~57.0.2",
     "expo-constants": "~57.0.18",
@@ -27,6 +29,7 @@
     "react-dom": "19.2.3",
     "react-native": "0.86.3",
     "react-native-gesture-handler": "~2.32.0",
+    "react-native-get-random-values": "~1.11.0",
     "react-native-reanimated": "4.5.1",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
@@ -35,6 +38,7 @@
     "react-native-worklets": "0.10.1"
   },
   "devDependencies": {
+    "@types/aes-js": "^3.1.4",
     "@types/react": "~19.2.2",
     "typescript": "~6.0.3"
   },
