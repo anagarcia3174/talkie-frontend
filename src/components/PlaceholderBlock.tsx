@@ -1,6 +1,5 @@
 import { colors, fonts } from "@/theme/tokens";
 import { StyleSheet, Text, View, type DimensionValue, type ViewStyle } from "react-native";
-import { GrainOverlay } from "./GrainOverlay";
 
 export function PlaceholderBlock({
   label,
@@ -15,7 +14,6 @@ export function PlaceholderBlock({
 }) {
   return (
     <View style={[styles.block, active && styles.active, { height }, style]}>
-      <GrainOverlay />
       {label && <Text style={[styles.label, active && styles.labelActive]}>{label}</Text>}
     </View>
   );

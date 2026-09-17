@@ -1,5 +1,7 @@
 import { Stack } from "expo-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "@/hooks/use-auth";
+import { TalkieHeader } from "@/components/TalkieHeader";
 import {
   useFonts,
   BigShouldersDisplay_900Black,
@@ -37,8 +39,15 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Stack />
-    </QueryClientProvider>
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <Stack>
+          <Stack.Screen
+            name="(tabs)"
+            options={{ header: () => <TalkieHeader /> }}
+          />
+        </Stack>
+      </QueryClientProvider>
+    </AuthProvider>
   );
 }

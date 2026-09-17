@@ -60,3 +60,9 @@ export interface Comment {
 export interface CommentWithUsername extends Comment {
   username: string | null;
 }
+
+export interface Profile {
+  id: string;
+  username: string | null;
+  created_at: string;
+}
