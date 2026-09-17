@@ -9,6 +9,7 @@ import {
 import { Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, fonts } from "@/theme/tokens";
+import { TalkieHeader } from "@/components/TalkieHeader";
 
 const TAB_BAR_CONTENT_HEIGHT = 44;
 const TAB_BAR_BOTTOM_PADDING = 18;
@@ -55,7 +56,6 @@ export default function TabsLayout() {
     <Tabs
       safeAreaInsets={{ bottom: 0 }}
       screenOptions={{
-        headerShown: false,
         tabBarShowLabel: false,
         tabBarStyle: {
           backgroundColor: colors.bgBase,
@@ -70,6 +70,7 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: "Home",
+          header: () => <TalkieHeader title="Talkie" />,
           tabBarButton: (props: any) => (
             <TabBarButton
               {...props}
@@ -83,6 +84,7 @@ export default function TabsLayout() {
         name="search"
         options={{
           title: "Search",
+          header: () => <TalkieHeader title="Search" />,
           tabBarButton: (props: any) => (
             <TabBarButton
               {...props}
@@ -96,6 +98,7 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: "Profile",
+          header: () => <TalkieHeader title="Profile" />,
           tabBarButton: (props: any) => (
             <TabBarButton
               {...props}

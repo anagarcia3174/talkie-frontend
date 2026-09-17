@@ -11,13 +11,12 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { useAuth } from "@/hooks/use-auth";
 import { signInWithApple, signInWithGoogle } from "@/lib/auth";
 import { getMe, updateUsername } from "@/lib/profile";
 import { ApiError } from "@/lib/api";
-import { colors, fonts, spacing } from "@/theme/tokens";
+import { colors, fonts, shadow, spacing } from "@/theme/tokens";
 import { Button } from "@/components/Button";
 import { EyebrowLabel } from "@/components/EyebrowLabel";
 
@@ -48,7 +47,10 @@ export default function ProfileScreen() {
 
       {session && (
         <View style={styles.footer}>
-          <Pressable onPress={logout} style={styles.logoutRow}>
+          {/* Matches the mockup's "Log out" treatment: a full-width ghost
+              button (transparent bg, divider-strong border), not the
+              underlined text link this used to be. */}
+          <Pressable onPress={logout} style={styles.logoutButton}>
             <Text style={styles.logoutLabel}>Log out</Text>
           </Pressable>
         </View>
@@ -91,14 +93,31 @@ function SignInView() {
 
   return (
     <View style={styles.authPrompt}>
-      <EyebrowLabel>Every moment counts</EyebrowLabel>
-      <Text style={styles.heading}>Sign in to{"\n"}join the conversation</Text>
-      <Text style={styles.subheading}>
-        Browsing Talkie is open to everyone — sign in to comment at the exact
-        moment something happens.
-      </Text>
-      {authError && <Text style={styles.errorText}>{authError}</Text>}
+      {/* Matches the mockup's signed-out layout (eyebrow + big display
+          headline w/ hard text-shadow + paragraph, vertically centered) —
+          copy is ours, not the mockup's "Watch together, apart" placeholder. */}
+      <View style={styles.authText}>
+        <EyebrowLabel>Every moment counts</EyebrowLabel>
+        {/* Two separate Text lines with a negative marginTop on the second,
+            rather than a tight lineHeight on one multi-line Text — RN clips
+            this display font's glyphs when lineHeight drops below fontSize
+            (see the note on `heading` below), so this is how the lines get
+            pulled closer without cutting off ascenders/descenders. */}
+        <View>
+          <Text style={styles.heading}>Sign in to</Text>
+          <Text style={[styles.heading, styles.headingSecondLine]}>join the</Text>
+          <Text style={[styles.heading, styles.headingSecondLine]}>conversation</Text>
+        </View>
+        <Text style={styles.subheading}>
+          Browsing Talkie is open to everyone — sign in to comment at the exact
+          moment something happens.
+        </Text>
+      </View>
       <View style={styles.authButtons}>
+        {authError && <Text style={styles.errorText}>{authError}</Text>}
+        {/* OAuth buttons keep their existing styling as-is — Google/Apple's
+            own branding guidelines govern how these look, not the design
+            system's button treatment. */}
         <Pressable
           onPress={handleGoogle}
           disabled={authLoading}
@@ -178,71 +197,73 @@ function AccountView({
 
   return (
     <View style={styles.account}>
-      <View style={styles.identity}>
-        <EyebrowLabel muted>
-          {providerLabel ? `Signed in with ${providerLabel}` : "Signed in"}
-        </EyebrowLabel>
-        {email && <Text style={styles.email}>{email}</Text>}
-      </View>
+      {/* Matches the mockup's signed-in card: identity + username in one
+          bordered, elevated block with an internal divider, instead of two
+          separate sections. */}
+      <View style={styles.identityCard}>
+        <View style={styles.identityRow}>
+          <EyebrowLabel>
+            {providerLabel ? `Signed in with ${providerLabel}` : "Signed in"}
+          </EyebrowLabel>
+          {email && <Text style={styles.email}>{email}</Text>}
+        </View>
 
-      <View style={styles.usernameSection}>
-        {showUsernameEditor ? (
-          <>
-            <EyebrowLabel>
-              {hasUsername ? "Edit username" : "Choose a username"}
-            </EyebrowLabel>
-            <TextInput
-              value={usernameInput}
-              onChangeText={setUsernameInput}
-              placeholder="e.g. film_fan_92"
-              placeholderTextColor={colors.textMuted}
-              style={styles.usernameInput}
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoFocus={hasUsername}
-            />
-            {updateUsernameMutation.isError && (
-              <Text style={styles.errorText}>
-                {updateUsernameMutation.error instanceof ApiError &&
-                updateUsernameMutation.error.status === 409
-                  ? "That username is already taken."
-                  : "Couldn't update username. Try again."}
-              </Text>
-            )}
-            <View style={styles.usernameActions}>
-              <Button
-                onPress={() => updateUsernameMutation.mutate(trimmed)}
-                disabled={unchanged || updateUsernameMutation.isPending}
-              >
-                {updateUsernameMutation.isPending ? "Saving…" : "Save username"}
-              </Button>
-              {hasUsername && (
-                <Pressable onPress={cancelEditingUsername} hitSlop={8}>
-                  <Text style={styles.cancelLabel}>Cancel</Text>
-                </Pressable>
-              )}
-            </View>
-          </>
-        ) : (
-          <View style={styles.usernameRow}>
-            <View style={styles.usernameInfo}>
-              <EyebrowLabel muted>Username</EyebrowLabel>
-              <Text style={styles.usernameText}>{profile?.username}</Text>
-            </View>
-            <Pressable
-              onPress={() => setIsEditingUsername(true)}
-              style={styles.editRow}
-              hitSlop={8}
-            >
-              <Ionicons
-                name="pencil-outline"
-                size={14}
-                color={colors.textSecondary}
+        <View style={styles.usernameSection}>
+          {showUsernameEditor ? (
+            <>
+              <EyebrowLabel>
+                {hasUsername ? "Edit username" : "Choose a username"}
+              </EyebrowLabel>
+              <TextInput
+                value={usernameInput}
+                onChangeText={setUsernameInput}
+                placeholder="e.g. film_fan_92"
+                placeholderTextColor={colors.textMuted}
+                style={styles.usernameInput}
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoFocus={hasUsername}
               />
-              <Text style={styles.editLabel}>Edit</Text>
-            </Pressable>
-          </View>
-        )}
+              {updateUsernameMutation.isError && (
+                <Text style={styles.errorText}>
+                  {updateUsernameMutation.error instanceof ApiError &&
+                  updateUsernameMutation.error.status === 409
+                    ? "That username is already taken."
+                    : "Couldn't update username. Try again."}
+                </Text>
+              )}
+              <View style={styles.usernameActions}>
+                <Button
+                  onPress={() => updateUsernameMutation.mutate(trimmed)}
+                  disabled={unchanged || updateUsernameMutation.isPending}
+                >
+                  {updateUsernameMutation.isPending ? "Saving…" : "Save username"}
+                </Button>
+                {hasUsername && (
+                  <Pressable onPress={cancelEditingUsername} hitSlop={8}>
+                    <Text style={styles.cancelLabel}>Cancel</Text>
+                  </Pressable>
+                )}
+              </View>
+            </>
+          ) : (
+            <View style={styles.usernameRow}>
+              <View style={styles.usernameInfo}>
+                <EyebrowLabel muted>Username</EyebrowLabel>
+                <Text style={styles.usernameText}>{profile?.username}</Text>
+              </View>
+              {/* Bordered button, not an icon — the design system defines
+                  no icon set (mono text labels only). */}
+              <Pressable
+                onPress={() => setIsEditingUsername(true)}
+                style={styles.editButton}
+                hitSlop={8}
+              >
+                <Text style={styles.editButtonLabel}>Edit</Text>
+              </Pressable>
+            </View>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -254,25 +275,33 @@ const styles = StyleSheet.create({
 
   authPrompt: {
     flex: 1,
-    padding: spacing.xl,
-    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: 34,
+    gap: 24,
     justifyContent: "center",
   },
+  authText: { gap: spacing.lg },
   heading: {
     fontFamily: fonts.display,
-    fontSize: 40,
-    lineHeight: 44,
+    fontSize: 60,
+    lineHeight: 62,
     textTransform: "uppercase",
     color: colors.textPrimary,
+    textShadowColor: shadow.color,
+    textShadowOffset: { width: shadow.offsetLg, height: shadow.offsetLg },
+    textShadowRadius: 0,
+  },
+  headingSecondLine: {
+    marginTop: -12,
   },
   subheading: {
     fontFamily: fonts.body,
     fontSize: 16,
     lineHeight: 24,
     color: colors.textSecondary,
-    maxWidth: 400,
+    maxWidth: 340,
   },
-  authButtons: { gap: spacing.sm, marginTop: spacing.sm },
+  authButtons: { gap: spacing.md },
   googleButton: {
     width: "100%",
     height: 48,
@@ -299,30 +328,56 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  account: { padding: spacing.xl, gap: spacing.xl },
-  identity: { gap: spacing.xs },
+  account: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg, gap: spacing.lg },
+  identityCard: {
+    borderWidth: 1,
+    borderColor: colors.divider,
+    backgroundColor: colors.bgElevated,
+    padding: spacing.lg,
+    gap: 18,
+  },
+  identityRow: { gap: 8 },
   email: {
-    fontFamily: fonts.bodyMedium,
+    fontFamily: fonts.body,
     fontSize: 16,
+    lineHeight: 22,
     color: colors.textPrimary,
   },
-  usernameSection: { gap: spacing.xs },
+  usernameSection: {
+    borderTopWidth: 1,
+    borderTopColor: colors.divider,
+    paddingTop: 18,
+    gap: spacing.xs,
+  },
   usernameRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-end",
     justifyContent: "space-between",
+    gap: spacing.md,
   },
-  usernameInfo: { gap: 4 },
+  usernameInfo: { gap: 8, flexShrink: 1, minWidth: 0 },
   usernameText: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 16,
+    fontFamily: fonts.display,
+    fontSize: 34,
+    lineHeight: 34,
+    textTransform: "uppercase",
     color: colors.textPrimary,
   },
-  editRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  editLabel: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 14,
-    color: colors.textSecondary,
+  editButton: {
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.dividerStrong,
+    paddingHorizontal: 18,
+    flexShrink: 0,
+  },
+  editButtonLabel: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 12,
+    letterSpacing: 1.44,
+    textTransform: "uppercase",
+    color: colors.textPrimary,
   },
   usernameActions: {
     flexDirection: "row",
@@ -346,19 +401,23 @@ const styles = StyleSheet.create({
   errorText: { fontFamily: fonts.body, fontSize: 13, color: colors.accent },
 
   footer: {
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
     paddingBottom: spacing.lg,
-    alignItems: "center",
   },
-  logoutRow: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.dividerStrong,
-    paddingBottom: 4,
+  logoutButton: {
+    height: 56,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.dividerStrong,
+    backgroundColor: "transparent",
   },
   logoutLabel: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 15,
-    color: colors.textSecondary,
+    fontFamily: fonts.bodyBold,
+    fontSize: 13,
+    letterSpacing: 1.56,
+    textTransform: "uppercase",
+    color: colors.textPrimary,
   },
 });

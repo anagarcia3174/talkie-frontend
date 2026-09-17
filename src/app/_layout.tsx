@@ -1,7 +1,6 @@
 import { Stack } from "expo-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/hooks/use-auth";
-import { TalkieHeader } from "@/components/TalkieHeader";
 import {
   useFonts,
   BigShouldersDisplay_900Black,
@@ -42,10 +41,9 @@ export default function RootLayout() {
     <AuthProvider>
       <QueryClientProvider client={queryClient}>
         <Stack>
-          <Stack.Screen
-            name="(tabs)"
-            options={{ header: () => <TalkieHeader /> }}
-          />
+          {/* Each tab now renders its own header (see (tabs)/_layout.tsx)
+              so it can show its own title instead of a fixed "Talkie". */}
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>
       </QueryClientProvider>
     </AuthProvider>
