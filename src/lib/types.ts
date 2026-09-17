@@ -1,5 +1,3 @@
-// Mirrors talkie-backend's JSON responses.
-
 export interface SearchResult {
   tmdb_id: number;
   media_type: "movie" | "tv";

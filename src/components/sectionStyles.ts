@@ -1,9 +1,8 @@
-
 import { StyleSheet } from "react-native";
 import { colors, fonts, spacing } from "@/theme/tokens";
 
 export const sectionStyles = StyleSheet.create({
-  section: { paddingVertical: spacing.xl, paddingHorizontal: spacing.lg, gap: spacing.lg },
+  section: { paddingVertical: spacing.xl, paddingHorizontal: spacing.md, gap: spacing.md },
   header: {
     flexDirection: "row",
     alignItems: "baseline",
@@ -14,8 +13,8 @@ export const sectionStyles = StyleSheet.create({
   },
   heading: {
     fontFamily: fonts.display,
-    fontSize: 32,
-    lineHeight: 32,
+    fontSize: 36,
+    lineHeight: 36,
     textTransform: "uppercase",
     color: colors.textPrimary,
   },

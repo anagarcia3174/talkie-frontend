@@ -154,9 +154,6 @@ function AccountView({
   useEffect(() => {
     setUsernameInput(profile?.username ?? "");
   }, [profile?.username]);
-
-  // Only show the input when there's no username yet, or the user asked to
-  // edit their existing one — otherwise just show it as text.
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const showUsernameEditor = !hasUsername || isEditingUsername;
 
@@ -237,7 +234,11 @@ function AccountView({
               style={styles.editRow}
               hitSlop={8}
             >
-              <Ionicons name="pencil-outline" size={14} color={colors.textSecondary} />
+              <Ionicons
+                name="pencil-outline"
+                size={14}
+                color={colors.textSecondary}
+              />
               <Text style={styles.editLabel}>Edit</Text>
             </Pressable>
           </View>

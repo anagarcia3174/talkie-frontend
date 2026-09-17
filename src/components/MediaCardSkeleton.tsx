@@ -8,8 +8,8 @@ export function MediaCardSkeleton({ titleWidth = "70%" }: { titleWidth?: Dimensi
       <View style={{ width: "100%", aspectRatio: 2 / 3 }}>
         <PlaceholderBlock height="100%" />
       </View>
-      <PlaceholderBlock height={15} style={{ width: titleWidth }} />
-      <PlaceholderBlock height={12} style={{ width: "35%" }} />
+      <PlaceholderBlock height={18} style={{ width: titleWidth }} />
+      <PlaceholderBlock height={11} style={{ width: "35%" }} />
     </View>
   );
 }

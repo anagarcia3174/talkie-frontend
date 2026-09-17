@@ -31,6 +31,6 @@ export function MediaCard({ item }: { item: TrendingResult }) {
 const styles = StyleSheet.create({
   card: { width: 140, gap: spacing.xs },
   posterWrap: { width: "100%", aspectRatio: 2 / 3, backgroundColor: colors.surface, overflow: "hidden" },
-  title: { fontFamily: fonts.bodyMedium, fontSize: 15, color: colors.textPrimary },
-  year: { fontFamily: fonts.mono, fontSize: 12, color: colors.textMuted },
+  title: { fontFamily: fonts.bodyMedium, fontSize: 14, lineHeight: 18, color: colors.textPrimary },
+  year: { fontFamily: fonts.mono, fontSize: 11, lineHeight: 11, color: colors.textMuted },
 });

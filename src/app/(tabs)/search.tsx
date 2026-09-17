@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { FlatList, StyleSheet, TextInput, View, type DimensionValue } from "react-native";
+import {
+  FlatList,
+  StyleSheet,
+  TextInput,
+  View,
+  type DimensionValue,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { search } from "@/lib/media";
 import { colors, fonts, spacing } from "@/theme/tokens";
@@ -8,16 +14,20 @@ import { MediaCard } from "@/components/MediaCard";
 import { MediaCardSkeleton } from "@/components/MediaCardSkeleton";
 import { EyebrowLabel } from "@/components/EyebrowLabel";
 
-const SKELETON_WIDTHS: DimensionValue[] = ["80%", "60%", "70%", "50%", "75%", "65%"];
+const SKELETON_WIDTHS: DimensionValue[] = [
+  "80%",
+  "60%",
+  "70%",
+  "50%",
+  "75%",
+  "65%",
+];
 const DEBOUNCE_MS = 450;
 
 export default function SearchScreen() {
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
 
-  // Search-as-you-type instead of talkie-web's submit-a-form pattern — feels
-  // better on a phone keyboard than requiring an explicit submit each time.
-  // The query only actually fires DEBOUNCE_MS after the user stops typing.
   useEffect(() => {
     const id = setTimeout(() => setDebounced(query.trim()), DEBOUNCE_MS);
     return () => clearTimeout(id);
@@ -47,9 +57,7 @@ export default function SearchScreen() {
           autoCapitalize="none"
           returnKeyType="search"
         />
-        {showSpinnerRow && (
-          <EyebrowLabel muted>Searching…</EyebrowLabel>
-        )}
+        {showSpinnerRow && <EyebrowLabel muted>Searching…</EyebrowLabel>}
       </View>
 
       {debounced.length === 0 ? null : isLoading ? (
@@ -95,7 +103,11 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: spacing.md,
   },
-  grid: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xl, gap: spacing.md },
+  grid: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xl,
+    gap: spacing.md,
+  },
   row: { justifyContent: "space-between" },
   statusBox: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
 });
