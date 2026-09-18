@@ -111,6 +111,7 @@ export default function TVShowScreen() {
             season={season as number}
             episode={episode}
             durationSeconds={episodeLoading || !ep ? null : (ep.runtime_minutes ?? 50) * 60}
+            releaseDate={ep?.air_date ?? null}
             belowHeader={
               <View style={styles.pickerRow}>
                 <SelectField

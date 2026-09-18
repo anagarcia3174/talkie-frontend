@@ -17,7 +17,9 @@ export interface TrendingResults {
 export interface MovieDetails {
   tmdb_id: number;
   title: string;
-  release_year?: number;
+  /** ISO "YYYY-MM-DD". Use lib/release-date's helpers rather than
+   * `new Date(...)` directly — see that file for why. */
+  release_date?: string;
   runtime_minutes?: number;
   poster_path?: string;
   overview?: string;

@@ -12,6 +12,7 @@ import {
 } from "@/lib/comments";
 import { formatTime } from "@/lib/format-time";
 import { getMe } from "@/lib/profile";
+import { isUpcoming as isDateUpcoming } from "@/lib/release-date";
 import type { CommentWithUsername } from "@/lib/types";
 import { colors, fonts, spacing } from "@/theme/tokens";
 import { CommentComposer } from "./CommentComposer";
@@ -27,6 +28,7 @@ export function Comments({
   season,
   episode,
   durationSeconds,
+  releaseDate,
   belowHeader,
 }: {
   mediaType: "movie" | "tv";
@@ -34,6 +36,7 @@ export function Comments({
   season?: number;
   episode?: number;
   durationSeconds: number | null;
+  releaseDate?: string | null;
   belowHeader?: ReactNode;
 }) {
   const { user } = useAuth();
@@ -45,7 +48,8 @@ export function Comments({
 
   const { data: profile } = useQuery({ queryKey: ["me"], queryFn: getMe, enabled: signedIn });
   const hasUsername = !!profile?.username;
-  const canComment = signedIn && hasUsername;
+  const isUpcoming = isDateUpcoming(releaseDate);
+  const canComment = signedIn && hasUsername && !isUpcoming;
 
   const queryKey =
     mediaType === "movie" ? ["comments", "movie", tmdbId] : ["comments", "tv", tmdbId, season, episode];
@@ -101,7 +105,7 @@ export function Comments({
     [comments, roundedPosition]
   );
 
-  function handleLongPress(comment: CommentWithUsername) {
+  function handleDeletePress(comment: CommentWithUsername) {
     if (!user || comment.user_id !== user.id) return;
     Alert.alert("Delete comment?", "This can't be undone.", [
       { text: "Cancel", style: "cancel" },
@@ -177,7 +181,9 @@ export function Comments({
                       username={c.username ?? "unknown"}
                       active={c.timestamp_seconds === roundedPosition}
                       onPress={() => scrubber.seek(c.timestamp_seconds)}
-                      onLongPress={() => handleLongPress(c)}
+                      onDelete={
+                        user && c.user_id === user.id ? () => handleDeletePress(c) : undefined
+                      }
                     >
                       {c.body}
                     </TimestampedQuote>
@@ -194,16 +200,18 @@ export function Comments({
             onChangeText={setDraft}
             onSubmit={handleComposerSubmit}
             submitLabel={
-              !signedIn
-                ? "Log in to join the conversation"
-                : !hasUsername
-                  ? "Choose a username to comment"
-                  : "Post comment"
+              isUpcoming
+                ? "Comments open once this airs"
+                : !signedIn
+                  ? "Log in to join the conversation"
+                  : !hasUsername
+                    ? "Choose a username to comment"
+                    : "Post comment"
             }
             pendingLabel="Posting…"
             isSubmitting={canComment && createMutation.isPending}
             editable={canComment}
-            requireValue={canComment}
+            requireValue={canComment || isUpcoming}
           />
         </>
       )}

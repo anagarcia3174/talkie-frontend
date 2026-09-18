@@ -12,6 +12,7 @@ import { MediaDetailSkeleton } from "@/components/MediaDetailSkeleton";
 import { PlaceholderBlock } from "@/components/PlaceholderBlock";
 import { formatTime } from "@/lib/format-time";
 import { getMovie } from "@/lib/media";
+import { yearFromDate } from "@/lib/release-date";
 import { tmdbImageUrl } from "@/lib/tmdb-image";
 import { colors, fonts, spacing } from "@/theme/tokens";
 
@@ -41,7 +42,7 @@ export default function MovieDetailScreen() {
 
   const poster = tmdbImageUrl(movie?.poster_path, "w342");
   const meta = movie
-    ? [movie.release_year, movie.runtime_minutes ? formatTime(movie.runtime_minutes * 60) : null]
+    ? [yearFromDate(movie.release_date), movie.runtime_minutes ? formatTime(movie.runtime_minutes * 60) : null]
         .filter(Boolean)
         .join(" · ")
     : "";
@@ -84,6 +85,7 @@ export default function MovieDetailScreen() {
             mediaType="movie"
             tmdbId={id}
             durationSeconds={(movie.runtime_minutes ?? 120) * 60}
+            releaseDate={movie.release_date ?? null}
           />
           </ScrollView>
         </KeyboardAvoidingView>
