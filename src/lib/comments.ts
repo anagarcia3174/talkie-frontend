@@ -22,11 +22,5 @@ export const createComment = (input: CreateCommentInput) =>
     body: JSON.stringify(input),
   });
 
-export const updateComment = (commentId: string, timestamp_seconds: number, body: string) =>
-  apiFetch<Comment>(`/comments/${commentId}`, {
-    method: "PATCH",
-    body: JSON.stringify({ timestamp_seconds, body }),
-  });
-
 export const deleteComment = (commentId: string) =>
   apiFetch<void>(`/comments/${commentId}`, { method: "DELETE" });

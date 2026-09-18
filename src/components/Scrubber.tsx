@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import { PanResponder, Pressable, StyleSheet, Text, View, type GestureResponderEvent } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { colors, fonts, shadow, spacing } from "@/theme/tokens";
 import { formatTime } from "@/lib/format-time";
 import { EyebrowLabel } from "./EyebrowLabel";
@@ -64,15 +65,15 @@ export function Scrubber({
     onSeekRef.current(ratio * durationRef.current);
   }
 
+  const handleTouchRef = useRef(handleTouch);
+  handleTouchRef.current = handleTouch;
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderTerminationRequest: () => false,
-      onPanResponderGrant: (evt: GestureResponderEvent) => handleTouch(evt.nativeEvent.locationX),
-      onPanResponderMove: (evt: GestureResponderEvent) => handleTouch(evt.nativeEvent.locationX),
-    })
+  const panGesture = useRef(
+    Gesture.Pan()
+      .runOnJS(true)
+      .minDistance(0)
+      .onBegin((e) => handleTouchRef.current(e.x))
+      .onUpdate((e) => handleTouchRef.current(e.x))
   ).current;
 
   return (
@@ -84,28 +85,28 @@ export function Scrubber({
         </Text>
       </View>
 
-      <View
-        style={styles.trackArea}
-        onLayout={(e) => setTrackWidth(e.nativeEvent.layout.width)}
-        {...panResponder.panHandlers}
-      >
-
-        <View style={styles.trackBg} pointerEvents="none" />
-        <View style={[styles.trackFill, { width: `${fillPct}%` }]} pointerEvents="none" />
-        <View style={[styles.thumb, { left: `${fillPct}%` }]} pointerEvents="none" />
-        <View style={styles.marksRow} pointerEvents="none">
-          {marks.map((mark) => (
-            <View
-              key={mark.id}
-              style={[
-                styles.mark,
-                { left: `${Math.max(0, Math.min(100, (mark.time / safeDuration) * 100))}%` },
-                mark.active && styles.markActive,
-              ]}
-            />
-          ))}
+      <GestureDetector gesture={panGesture}>
+        <View
+          style={styles.trackArea}
+          onLayout={(e) => setTrackWidth(e.nativeEvent.layout.width)}
+        >
+          <View style={styles.trackBg} pointerEvents="none" />
+          <View style={[styles.trackFill, { width: `${fillPct}%` }]} pointerEvents="none" />
+          <View style={[styles.thumb, { left: `${fillPct}%` }]} pointerEvents="none" />
+          <View style={styles.marksRow} pointerEvents="none">
+            {marks.map((mark) => (
+              <View
+                key={mark.id}
+                style={[
+                  styles.mark,
+                  { left: `${Math.max(0, Math.min(100, (mark.time / safeDuration) * 100))}%` },
+                  mark.active && styles.markActive,
+                ]}
+              />
+            ))}
+          </View>
         </View>
-      </View>
+      </GestureDetector>
 
       <View style={styles.controlsRow}>
         <View style={styles.controlsSide}>

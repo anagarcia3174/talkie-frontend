@@ -1,4 +1,5 @@
 import { Stack } from "expo-router";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/hooks/use-auth";
 import {
@@ -38,15 +39,16 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <Stack>
-
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="movie/[tmdbId]" options={{ headerShown: false, gestureEnabled: false }} />
-          <Stack.Screen name="tv/[tmdbId]" options={{ headerShown: false, gestureEnabled: false }} />
-        </Stack>
-      </QueryClientProvider>
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="movie/[tmdbId]" options={{ headerShown: false}} />
+            <Stack.Screen name="tv/[tmdbId]" options={{ headerShown: false}} />
+          </Stack>
+        </QueryClientProvider>
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 }
