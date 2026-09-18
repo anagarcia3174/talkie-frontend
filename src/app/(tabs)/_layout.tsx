@@ -11,8 +11,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, fonts } from "@/theme/tokens";
 import { TalkieHeader } from "@/components/TalkieHeader";
 
-const TAB_BAR_CONTENT_HEIGHT = 44;
-const TAB_BAR_BOTTOM_PADDING = 18;
+const TAB_BAR_CONTENT_HEIGHT = 56;
+const TAB_BAR_BOTTOM_PADDING = 22;
 
 function TabBarButton({
   label,
@@ -120,8 +120,8 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   tabLabel: {
-    fontSize: 11,
-    lineHeight: 11,
+    fontSize: 13,
+    lineHeight: 13,
     letterSpacing: 3.3,
     textTransform: "uppercase",
   },

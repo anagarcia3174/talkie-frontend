@@ -9,7 +9,7 @@ import { PlaceholderBlock } from "./PlaceholderBlock";
 export function MediaCard({ item }: { item: TrendingResult }) {
   const router = useRouter();
   const poster = tmdbImageUrl(item.poster_path, "w342");
-  const path = (item.media_type === "tv" ? `/tv/${item.tmdb_id}` : `/movie/${item.tmdb_id}`) as any;
+  const path = ((item.media_type === "tv" ? `/tv/${item.tmdb_id}` : `/movie/${item.tmdb_id}`) + "?from=Trending") as any;
 
   return (
     <Pressable style={styles.card} onPress={() => router.push(path)}>

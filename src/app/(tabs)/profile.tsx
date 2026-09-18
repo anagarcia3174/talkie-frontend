@@ -14,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { useAuth } from "@/hooks/use-auth";
 import { signInWithApple, signInWithGoogle } from "@/lib/auth";
+import { describeAuthError } from "@/lib/auth-errors";
 import { getMe, updateUsername } from "@/lib/profile";
 import { ApiError } from "@/lib/api";
 import { colors, fonts, shadow, spacing } from "@/theme/tokens";
@@ -25,11 +26,39 @@ const PROVIDER_LABELS: Record<string, string> = {
   apple: "Apple",
 };
 
+const PROVIDER_ORDER = ["google", "apple"];
+
+function formatProviders(providers: string[] | undefined): string | null {
+  if (!providers || providers.length === 0) return null;
+  const ordered = [
+    ...PROVIDER_ORDER.filter((known) => providers.includes(known)),
+    ...providers.filter((p) => !PROVIDER_ORDER.includes(p)),
+  ];
+  const labels = ordered.map((p) => PROVIDER_LABELS[p] ?? p);
+  if (labels.length === 1) return labels[0];
+  return `${labels.slice(0, -1).join(", ")} and ${labels[labels.length - 1]}`;
+}
+
 export default function ProfileScreen() {
   const { session, loading, logout } = useAuth();
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
 
   if (loading) {
     return <SafeAreaView style={styles.page} edges={[]} />;
+  }
+
+
+  async function handleLogout() {
+    setLogoutError(null);
+    setLoggingOut(true);
+    try {
+      await logout();
+    } catch (err) {
+      setLogoutError(describeAuthError(err) ?? "Couldn't log out. Try again.");
+    } finally {
+      setLoggingOut(false);
+    }
   }
 
   return (
@@ -38,7 +67,7 @@ export default function ProfileScreen() {
         {session ? (
           <AccountView
             email={session.user.email ?? null}
-            provider={session.user.app_metadata.provider}
+            providers={session.user.app_metadata.providers}
           />
         ) : (
           <SignInView />
@@ -47,11 +76,15 @@ export default function ProfileScreen() {
 
       {session && (
         <View style={styles.footer}>
-          {/* Matches the mockup's "Log out" treatment: a full-width ghost
-              button (transparent bg, divider-strong border), not the
-              underlined text link this used to be. */}
-          <Pressable onPress={logout} style={styles.logoutButton}>
-            <Text style={styles.logoutLabel}>Log out</Text>
+          {logoutError && <Text style={styles.logoutError}>{logoutError}</Text>}
+          <Pressable
+            onPress={handleLogout}
+            disabled={loggingOut}
+            style={[styles.logoutButton, loggingOut && styles.disabledButton]}
+          >
+            <Text style={styles.logoutLabel}>
+              {loggingOut ? "Logging out…" : "Log out"}
+            </Text>
           </Pressable>
         </View>
       )}
@@ -69,9 +102,7 @@ function SignInView() {
     try {
       await signInWithGoogle();
     } catch (err) {
-      setAuthError(
-        err instanceof Error ? err.message : "Google sign-in failed.",
-      );
+      setAuthError(describeAuthError(err));
     } finally {
       setAuthLoading(false);
     }
@@ -83,9 +114,7 @@ function SignInView() {
     try {
       await signInWithApple();
     } catch (err) {
-      setAuthError(
-        err instanceof Error ? err.message : "Apple sign-in failed.",
-      );
+      setAuthError(describeAuthError(err));
     } finally {
       setAuthLoading(false);
     }
@@ -93,16 +122,8 @@ function SignInView() {
 
   return (
     <View style={styles.authPrompt}>
-      {/* Matches the mockup's signed-out layout (eyebrow + big display
-          headline w/ hard text-shadow + paragraph, vertically centered) —
-          copy is ours, not the mockup's "Watch together, apart" placeholder. */}
       <View style={styles.authText}>
         <EyebrowLabel>Every moment counts</EyebrowLabel>
-        {/* Two separate Text lines with a negative marginTop on the second,
-            rather than a tight lineHeight on one multi-line Text — RN clips
-            this display font's glyphs when lineHeight drops below fontSize
-            (see the note on `heading` below), so this is how the lines get
-            pulled closer without cutting off ascenders/descenders. */}
         <View>
           <Text style={styles.heading}>Sign in to</Text>
           <Text style={[styles.heading, styles.headingSecondLine]}>join the</Text>
@@ -115,9 +136,6 @@ function SignInView() {
       </View>
       <View style={styles.authButtons}>
         {authError && <Text style={styles.errorText}>{authError}</Text>}
-        {/* OAuth buttons keep their existing styling as-is — Google/Apple's
-            own branding guidelines govern how these look, not the design
-            system's button treatment. */}
         <Pressable
           onPress={handleGoogle}
           disabled={authLoading}
@@ -159,10 +177,10 @@ function SignInView() {
 
 function AccountView({
   email,
-  provider,
+  providers,
 }: {
   email: string | null;
-  provider?: string;
+  providers?: string[];
 }) {
   const queryClient = useQueryClient();
 
@@ -191,15 +209,10 @@ function AccountView({
 
   const trimmed = usernameInput.trim();
   const unchanged = trimmed.length === 0 || trimmed === profile?.username;
-  const providerLabel = provider
-    ? (PROVIDER_LABELS[provider] ?? provider)
-    : null;
+  const providerLabel = formatProviders(providers);
 
   return (
     <View style={styles.account}>
-      {/* Matches the mockup's signed-in card: identity + username in one
-          bordered, elevated block with an internal divider, instead of two
-          separate sections. */}
       <View style={styles.identityCard}>
         <View style={styles.identityRow}>
           <EyebrowLabel>
@@ -404,6 +417,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
     paddingBottom: spacing.lg,
+  },
+  logoutError: {
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.accent,
+    marginBottom: spacing.sm,
+    textAlign: "center",
   },
   logoutButton: {
     height: 56,

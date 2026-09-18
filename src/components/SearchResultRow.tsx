@@ -9,7 +9,7 @@ import { PlaceholderBlock } from "./PlaceholderBlock";
 export function SearchResultRow({ item }: { item: SearchResult }) {
   const router = useRouter();
   const poster = tmdbImageUrl(item.poster_path, "w200");
-  const path = (item.media_type === "tv" ? `/tv/${item.tmdb_id}` : `/movie/${item.tmdb_id}`) as any;
+  const path = ((item.media_type === "tv" ? `/tv/${item.tmdb_id}` : `/movie/${item.tmdb_id}`) + "?from=Search") as any;
   const typeLabel = item.media_type === "tv" ? "Series" : "Movie";
   const meta = [item.release_year, typeLabel].filter(Boolean).join(" · ");
 

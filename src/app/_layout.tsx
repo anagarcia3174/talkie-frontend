@@ -41,9 +41,10 @@ export default function RootLayout() {
     <AuthProvider>
       <QueryClientProvider client={queryClient}>
         <Stack>
-          {/* Each tab now renders its own header (see (tabs)/_layout.tsx)
-              so it can show its own title instead of a fixed "Talkie". */}
+
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="movie/[tmdbId]" options={{ headerShown: false, gestureEnabled: false }} />
+          <Stack.Screen name="tv/[tmdbId]" options={{ headerShown: false, gestureEnabled: false }} />
         </Stack>
       </QueryClientProvider>
     </AuthProvider>

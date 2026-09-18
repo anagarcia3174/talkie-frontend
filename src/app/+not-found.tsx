@@ -5,7 +5,7 @@ import { colors, fonts } from "@/theme/tokens";
 export default function NotFoundScreen() {
   return (
     <>
-      <Stack.Screen options={{ title: "Not found" }} />
+      <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.page}>
         <Text style={styles.heading}>This screen doesn't exist.</Text>
         <Link href="/" style={styles.link}>

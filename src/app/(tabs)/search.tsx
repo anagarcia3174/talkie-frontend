@@ -48,9 +48,6 @@ export default function SearchScreen() {
 
   return (
     <SafeAreaView style={styles.page} edges={[]}>
-      {/* No heading here — the tab's own header (TalkieHeader, set in
-          (tabs)/_layout.tsx) now shows "Search", so this block is just the
-          search bar itself. */}
       <View style={styles.searchBar}>
         <View style={styles.searchRow}>
           <TextInput
@@ -61,7 +58,7 @@ export default function SearchScreen() {
             style={styles.input}
             autoCorrect={false}
             autoCapitalize="none"
-            returnKeyType="search"
+            returnKeyType="done"
           />
           <Pressable style={styles.goButton} onPress={() => setDebounced(trimmedQuery)}>
             <Text style={styles.goLabel}>Go</Text>

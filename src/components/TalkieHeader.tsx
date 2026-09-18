@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
   wordmark: {
     fontFamily: fonts.display,
     fontSize: 34,
-    lineHeight: 34,
+    lineHeight: 35,
     textTransform: "uppercase",
     color: colors.textPrimary,
   },

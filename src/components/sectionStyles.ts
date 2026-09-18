@@ -14,7 +14,7 @@ export const sectionStyles = StyleSheet.create({
   heading: {
     fontFamily: fonts.display,
     fontSize: 36,
-    lineHeight: 36,
+    lineHeight: 37,
     textTransform: "uppercase",
     color: colors.textPrimary,
   },
