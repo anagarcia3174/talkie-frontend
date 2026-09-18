@@ -1,9 +1,18 @@
+import { describeApiError } from "@/lib/api-errors";
 import { colors, fonts, spacing } from "@/theme/tokens";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { EyebrowLabel } from "./EyebrowLabel";
 import { sectionStyles } from "./sectionStyles";
 
-export function TrendingError({ title, onRetry }: { title: string; onRetry: () => void }) {
+export function TrendingError({
+  title,
+  onRetry,
+  error,
+}: {
+  title: string;
+  onRetry: () => void;
+  error?: unknown;
+}) {
   return (
     <View style={sectionStyles.section}>
       <View style={sectionStyles.header}>
@@ -11,7 +20,9 @@ export function TrendingError({ title, onRetry }: { title: string; onRetry: () =
         <EyebrowLabel>Error</EyebrowLabel>
       </View>
       <View style={styles.errorBox}>
-        <Text style={styles.message}>Failed to load trending media.</Text>
+        <Text style={styles.message}>
+          {error ? describeApiError(error) : "Failed to load trending media."}
+        </Text>
         <Pressable style={styles.retryButton} onPress={onRetry}>
           <Text style={styles.retryLabel}>Try again</Text>
         </Pressable>

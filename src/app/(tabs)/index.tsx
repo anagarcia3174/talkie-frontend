@@ -22,7 +22,7 @@ export default function HomeScreen() {
             <TrendingSkeleton title="Trending Shows" />
           </>
         ) : error ? (
-          <TrendingError title="Trending" onRetry={() => refetch()} />
+          <TrendingError title="Trending" onRetry={() => refetch()} error={error} />
         ) : (
           <>
             <Trending title="Trending Movies" items={data?.movies ?? []} />

@@ -11,6 +11,7 @@ import { MediaDetailError } from "@/components/MediaDetailError";
 import { MediaDetailSkeleton } from "@/components/MediaDetailSkeleton";
 import { PlaceholderBlock } from "@/components/PlaceholderBlock";
 import { SelectField } from "@/components/SelectField";
+import { describeApiError } from "@/lib/api-errors";
 import { getEpisode, getTVShow } from "@/lib/media";
 import { tmdbImageUrl } from "@/lib/tmdb-image";
 import { colors, fonts, spacing } from "@/theme/tokens";
@@ -76,7 +77,7 @@ export default function TVShowScreen() {
       {isLoading || (show && season === null) ? (
         <MediaDetailSkeleton />
       ) : error || !show ? (
-        <MediaDetailError message="Couldn't load this title." />
+        <MediaDetailError message={error ? describeApiError(error) : "Couldn't load this title."} />
       ) : (
         <KeyboardAvoidingView
           style={styles.keyboardAvoiding}

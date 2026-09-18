@@ -10,6 +10,7 @@ import {
   type DimensionValue,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { describeApiError } from "@/lib/api-errors";
 import { search } from "@/lib/media";
 import { colors, fonts, shadow, spacing } from "@/theme/tokens";
 import { SearchResultRow } from "@/components/SearchResultRow";
@@ -78,6 +79,7 @@ export default function SearchScreen() {
       ) : error ? (
         <View style={styles.statusBox}>
           <EyebrowLabel>Search failed</EyebrowLabel>
+          <Text style={styles.statusMessage}>{describeApiError(error)}</Text>
         </View>
       ) : data && data.length === 0 ? (
         <View style={styles.noResults}>
@@ -148,7 +150,8 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
     gap: 18,
   },
-  statusBox: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
+  statusBox: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, gap: spacing.sm },
+  statusMessage: { fontFamily: fonts.body, fontSize: 15, lineHeight: 22.5, color: colors.textSecondary },
   noResults: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.xl,

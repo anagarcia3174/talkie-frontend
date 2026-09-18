@@ -13,6 +13,7 @@ export function CommentComposer({
   isSubmitting = false,
   editable = true,
   requireValue = true,
+  errorText = null,
 }: {
   label: string;
   time: string;
@@ -24,6 +25,7 @@ export function CommentComposer({
   isSubmitting?: boolean;
   editable?: boolean;
   requireValue?: boolean;
+  errorText?: string | null;
 }) {
   const disabled = isSubmitting || (requireValue && value.trim().length === 0);
 
@@ -54,6 +56,7 @@ export function CommentComposer({
         editable={editable && !isSubmitting}
         returnKeyType="done"
       />
+      {errorText && <Text style={styles.errorText}>{errorText}</Text>}
       <Pressable onPress={onSubmit} disabled={disabled} style={[styles.submit, disabled && styles.disabled]}>
         <Text style={styles.submitLabel}>{isSubmitting ? pendingLabel : submitLabel}</Text>
       </Pressable>
@@ -84,6 +87,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   textareaDisabled: { opacity: 0.5 },
+  errorText: { fontFamily: fonts.body, fontSize: 13, color: colors.accent },
   submit: {
     height: 52,
     alignItems: "center",

@@ -16,7 +16,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { signInWithApple, signInWithGoogle } from "@/lib/auth";
 import { describeAuthError } from "@/lib/auth-errors";
 import { getMe, updateUsername } from "@/lib/profile";
-import { ApiError } from "@/lib/api";
+import { describeApiError } from "@/lib/api-errors";
 import { colors, fonts, shadow, spacing } from "@/theme/tokens";
 import { Button } from "@/components/Button";
 import { EyebrowLabel } from "@/components/EyebrowLabel";
@@ -239,10 +239,7 @@ function AccountView({
               />
               {updateUsernameMutation.isError && (
                 <Text style={styles.errorText}>
-                  {updateUsernameMutation.error instanceof ApiError &&
-                  updateUsernameMutation.error.status === 409
-                    ? "That username is already taken."
-                    : "Couldn't update username. Try again."}
+                  {describeApiError(updateUsernameMutation.error, "username")}
                 </Text>
               )}
               <View style={styles.usernameActions}>

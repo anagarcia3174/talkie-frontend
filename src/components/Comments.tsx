@@ -10,6 +10,7 @@ import {
   listEpisodeComments,
   listMovieComments,
 } from "@/lib/comments";
+import { describeApiError } from "@/lib/api-errors";
 import { formatTime } from "@/lib/format-time";
 import { getMe } from "@/lib/profile";
 import { isUpcoming as isDateUpcoming } from "@/lib/release-date";
@@ -44,6 +45,7 @@ export function Comments({
   const queryClient = useQueryClient();
   const scrubber = useMediaScrubber(durationSeconds ?? 1);
   const [draft, setDraft] = useState("");
+  const [createError, setCreateError] = useState<string | null>(null);
   const signedIn = !!user;
 
   const { data: profile } = useQuery({ queryKey: ["me"], queryFn: getMe, enabled: signedIn });
@@ -73,12 +75,15 @@ export function Comments({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
       setDraft("");
+      setCreateError(null);
     },
+    onError: (err) => setCreateError(describeApiError(err, "comment-create")),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteComment(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+    onError: (err) => Alert.alert("Couldn't delete comment", describeApiError(err, "comment-delete")),
   });
 
   const roundedPosition = Math.round(scrubber.position);
@@ -116,6 +121,7 @@ export function Comments({
   function submit() {
     const trimmed = draft.trim();
     if (!trimmed) return;
+    setCreateError(null);
     createMutation.mutate(trimmed);
   }
 
@@ -166,7 +172,7 @@ export function Comments({
             {isLoading ? (
               <EyebrowLabel muted>Loading comments…</EyebrowLabel>
             ) : error ? (
-              <EyebrowLabel muted>Couldn't load comments</EyebrowLabel>
+              <Text style={styles.empty}>{describeApiError(error)}</Text>
             ) : count === 0 ? (
               <Text style={styles.empty}>No comments yet. Be the first to mark a moment.</Text>
             ) : visibleComments.length === 0 ? (
@@ -212,6 +218,7 @@ export function Comments({
             isSubmitting={canComment && createMutation.isPending}
             editable={canComment}
             requireValue={canComment || isUpcoming}
+            errorText={createError}
           />
         </>
       )}

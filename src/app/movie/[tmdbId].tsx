@@ -10,6 +10,7 @@ import { DetailBackLink } from "@/components/DetailBackLink";
 import { MediaDetailError } from "@/components/MediaDetailError";
 import { MediaDetailSkeleton } from "@/components/MediaDetailSkeleton";
 import { PlaceholderBlock } from "@/components/PlaceholderBlock";
+import { describeApiError } from "@/lib/api-errors";
 import { formatTime } from "@/lib/format-time";
 import { getMovie } from "@/lib/media";
 import { yearFromDate } from "@/lib/release-date";
@@ -53,7 +54,7 @@ export default function MovieDetailScreen() {
       {isLoading ? (
         <MediaDetailSkeleton />
       ) : error || !movie ? (
-        <MediaDetailError message="Couldn't load this title." />
+        <MediaDetailError message={error ? describeApiError(error) : "Couldn't load this title."} />
       ) : (
         <KeyboardAvoidingView
           style={styles.keyboardAvoiding}
