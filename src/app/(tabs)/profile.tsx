@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Alert,
   Image,
   Platform,
   Pressable,
@@ -14,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { useAuth } from "@/hooks/use-auth";
 import { signInWithApple, signInWithGoogle } from "@/lib/auth";
+import { ApiError } from "@/lib/api";
 import { describeAuthError } from "@/lib/auth-errors";
 import { getMe, updateUsername } from "@/lib/profile";
 import { describeApiError } from "@/lib/api-errors";
@@ -40,9 +42,12 @@ function formatProviders(providers: string[] | undefined): string | null {
 }
 
 export default function ProfileScreen() {
-  const { session, loading, logout } = useAuth();
+  const { session, loading, logout, deleteAccount } = useAuth();
+  const queryClient = useQueryClient();
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   if (loading) {
     return <SafeAreaView style={styles.page} edges={[]} />;
@@ -59,6 +64,39 @@ export default function ProfileScreen() {
     } finally {
       setLoggingOut(false);
     }
+  }
+
+  async function handleDeleteAccount() {
+    setDeleteError(null);
+    setDeleting(true);
+    try {
+      await deleteAccount();
+      queryClient.clear();
+    } catch (err) {
+      // A cancelled re-authentication returns null and shows no error.
+      setDeleteError(
+        err instanceof ApiError
+          ? describeApiError(err, "account-delete")
+          : describeAuthError(err),
+      );
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  function confirmDeleteAccount() {
+    Alert.alert(
+      "Delete account?",
+      "This permanently deletes your account, username, and all of your comments. You'll be asked to sign in again to confirm. This can't be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: handleDeleteAccount,
+        },
+      ],
+    );
   }
 
   return (
@@ -84,6 +122,19 @@ export default function ProfileScreen() {
           >
             <Text style={styles.logoutLabel}>
               {loggingOut ? "Logging out…" : "Log out"}
+            </Text>
+          </Pressable>
+          {deleteError && <Text style={styles.deleteError}>{deleteError}</Text>}
+          <Pressable
+            onPress={confirmDeleteAccount}
+            disabled={deleting || loggingOut}
+            style={[
+              styles.deleteButton,
+              (deleting || loggingOut) && styles.disabledButton,
+            ]}
+          >
+            <Text style={styles.deleteLabel}>
+              {deleting ? "Deleting account…" : "Delete account"}
             </Text>
           </Pressable>
         </View>
@@ -429,6 +480,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.dividerStrong,
     backgroundColor: "transparent",
+  },
+  deleteError: {
+    fontFamily: fonts.body,
+    fontSize: 13,
+    color: colors.accent,
+    marginTop: spacing.sm,
+    textAlign: "center",
+  },
+  deleteButton: {
+    height: 56,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.accent,
+    backgroundColor: "transparent",
+    marginTop: spacing.sm,
+  },
+  deleteLabel: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 13,
+    letterSpacing: 1.56,
+    textTransform: "uppercase",
+    color: colors.accent,
   },
   logoutLabel: {
     fontFamily: fonts.bodyBold,

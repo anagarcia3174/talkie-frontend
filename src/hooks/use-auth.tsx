@@ -5,14 +5,23 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { Platform } from "react-native";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
+import {
+  reauthenticateWithApple,
+  reauthenticateWithGoogle,
+  revokeGoogleAccess,
+  signOutOfGoogle,
+} from "@/lib/auth";
+import { deleteAccount as deleteAccountRequest } from "@/lib/profile";
 
 type AuthContextValue = {
   session: Session | null;
   user: User | null;
   loading: boolean;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue>({
@@ -20,6 +29,7 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   loading: true,
   logout: async () => {},
+  deleteAccount: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -54,11 +64,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) {
       throw error;
     }
+    await signOutOfGoogle();
+  };
+
+  const deleteAccount = async () => {
+    const providers = session?.user.app_metadata.providers as
+      | string[]
+      | undefined;
+    let appleAuthorizationCode: string | undefined;
+    if (Platform.OS === "ios" && providers?.includes("apple")) {
+      appleAuthorizationCode = await reauthenticateWithApple();
+    } else {
+      await reauthenticateWithGoogle();
+    }
+
+    await deleteAccountRequest(appleAuthorizationCode);
+    await revokeGoogleAccess();
+    await supabase.auth.signOut({ scope: "local" });
   };
 
   return (
     <AuthContext.Provider
-      value={{ session, user: session?.user ?? null, loading, logout }}
+      value={{
+        session,
+        user: session?.user ?? null,
+        loading,
+        logout,
+        deleteAccount,
+      }}
     >
       {children}
     </AuthContext.Provider>

@@ -1,7 +1,11 @@
 import { ApiError } from "@/lib/api";
 
 
-export type ApiErrorContext = "username" | "comment-create" | "comment-delete";
+export type ApiErrorContext =
+  | "username"
+  | "comment-create"
+  | "comment-delete"
+  | "account-delete";
 
 
 export function describeApiError(err: unknown, context?: ApiErrorContext): string {
@@ -28,6 +32,9 @@ export function describeApiError(err: unknown, context?: ApiErrorContext): strin
       if (context === "comment-delete") {
         return "You can only delete your own comments.";
       }
+      if (context === "account-delete") {
+        return "We couldn't confirm your recent sign-in. Please try again.";
+      }
       return "You don't have permission to do that.";
     case 404:
       if (context === "comment-delete") {
@@ -39,6 +46,8 @@ export function describeApiError(err: unknown, context?: ApiErrorContext): strin
         return "That username is already taken.";
       }
       return "That already exists.";
+    case 429:
+      return "Too many attempts. Please wait a minute and try again.";
     case 502:
       return "Couldn't reach the movie database. Try again in a moment.";
     default:

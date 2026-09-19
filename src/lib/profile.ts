@@ -8,3 +8,11 @@ export const updateUsername = (username: string) =>
     method: "PATCH",
     body: JSON.stringify({ username }),
   });
+
+export const deleteAccount = (appleAuthorizationCode?: string) =>
+  apiFetch<void>("/me", {
+    method: "DELETE",
+    body: JSON.stringify({
+      apple_authorization_code: appleAuthorizationCode ?? "",
+    }),
+  });

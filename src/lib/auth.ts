@@ -23,7 +23,7 @@ export async function signInWithGoogle() {
   return session;
 }
 
-export async function signInWithApple() {
+async function appleSignIn() {
   if (Platform.OS !== "ios") {
     throw new Error("Sign in with Apple is only available on iOS");
   }
@@ -50,5 +50,33 @@ export async function signInWithApple() {
     nonce: rawNonce,
   });
   if (error) throw error;
+  return { session, authorizationCode: credential.authorizationCode };
+}
+
+export async function signInWithApple() {
+  const { session } = await appleSignIn();
   return session;
+}
+
+export async function reauthenticateWithApple() {
+  const { authorizationCode } = await appleSignIn();
+  if (!authorizationCode) throw new Error("No authorization code from Apple");
+  return authorizationCode;
+}
+
+export async function reauthenticateWithGoogle() {
+  await signInWithGoogle();
+}
+
+export async function signOutOfGoogle() {
+  try {
+    await GoogleSignin.signOut();
+  } catch {}
+}
+
+export async function revokeGoogleAccess() {
+  try {
+    await GoogleSignin.revokeAccess();
+  } catch {}
+  await signOutOfGoogle();
 }
