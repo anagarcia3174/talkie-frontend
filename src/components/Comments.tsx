@@ -9,15 +9,17 @@ import {
   deleteComment,
   listEpisodeComments,
   listMovieComments,
+  reportComment,
 } from "@/lib/comments";
 import { describeApiError } from "@/lib/api-errors";
 import { formatTime } from "@/lib/format-time";
 import { getMe } from "@/lib/profile";
 import { isUpcoming as isDateUpcoming } from "@/lib/release-date";
-import type { CommentWithUsername } from "@/lib/types";
+import type { CommentWithUsername, ReportReason } from "@/lib/types";
 import { colors, fonts, spacing } from "@/theme/tokens";
 import { CommentComposer } from "./CommentComposer";
 import { EyebrowLabel } from "./EyebrowLabel";
+import { ReportSheet } from "./ReportSheet";
 import { Scrubber } from "./Scrubber";
 import { TimestampedQuote } from "./TimestampedQuote";
 
@@ -86,6 +88,31 @@ export function Comments({
     onError: (err) => Alert.alert("Couldn't delete comment", describeApiError(err, "comment-delete")),
   });
 
+  const [reportTargetId, setReportTargetId] = useState<string | null>(null);
+  const [reportError, setReportError] = useState<string | null>(null);
+
+  const reportMutation = useMutation({
+    mutationFn: ({ id, reason, detail }: { id: string; reason: ReportReason; detail: string }) =>
+      reportComment(id, { reason, detail: detail || undefined }),
+    onSuccess: () => {
+      setReportTargetId(null);
+      setReportError(null);
+      Alert.alert("Report sent", "Thanks for helping keep Talkie respectful.");
+    },
+    onError: (err) => setReportError(describeApiError(err, "comment-report")),
+  });
+
+  function openReport(comment: CommentWithUsername) {
+    setReportError(null);
+    setReportTargetId(comment.id);
+  }
+
+  function closeReport() {
+    if (reportMutation.isPending) return;
+    setReportTargetId(null);
+    setReportError(null);
+  }
+
   const roundedPosition = Math.round(scrubber.position);
 
   const marks = useMemo(
@@ -139,11 +166,6 @@ export function Comments({
 
   return (
     <View style={styles.wrap}>
-      {/* One bordered header block — heading/count row, then whatever
-          belowHeader supplies (the TV screen's season/episode pickers).
-          The divider sits under all of it, not just the heading, so a
-          picker row reads as part of this block rather than floating
-          beneath a border that already closed it off. */}
       <View style={styles.header}>
         <View style={styles.headerRow}>
           <Text style={styles.heading}>Comments</Text>
@@ -190,6 +212,7 @@ export function Comments({
                       onDelete={
                         user && c.user_id === user.id ? () => handleDeletePress(c) : undefined
                       }
+                      onReport={user && c.user_id !== user.id ? () => openReport(c) : undefined}
                     >
                       {c.body}
                     </TimestampedQuote>
@@ -222,6 +245,16 @@ export function Comments({
           />
         </>
       )}
+
+      <ReportSheet
+        visible={reportTargetId !== null}
+        isSubmitting={reportMutation.isPending}
+        errorText={reportError}
+        onClose={closeReport}
+        onSubmit={(reason, detail) =>
+          reportTargetId && reportMutation.mutate({ id: reportTargetId, reason, detail })
+        }
+      />
     </View>
   );
 }

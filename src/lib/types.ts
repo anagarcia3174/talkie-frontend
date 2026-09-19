@@ -61,6 +61,15 @@ export interface CommentWithUsername extends Comment {
   username: string | null;
 }
 
+export type ReportReason = "spam" | "harassment" | "inappropriate" | "spoiler" | "other";
+
+export interface Report {
+  id: string;
+  comment_id: string;
+  reason: ReportReason;
+  created_at: string;
+}
+
 export interface Profile {
   id: string;
   username: string | null;

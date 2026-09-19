@@ -5,6 +5,7 @@ export type ApiErrorContext =
   | "username"
   | "comment-create"
   | "comment-delete"
+  | "comment-report"
   | "account-delete";
 
 
@@ -22,6 +23,9 @@ export function describeApiError(err: unknown, context?: ApiErrorContext): strin
       if (context === "username") {
         return "Usernames can only use letters, numbers, and underscores (3–30 characters).";
       }
+      if (context === "comment-report") {
+        return "Couldn't send that report. Try again.";
+      }
       if (context === "comment-create") {
         return "Couldn't post that comment. Try again.";
       }
@@ -32,18 +36,24 @@ export function describeApiError(err: unknown, context?: ApiErrorContext): strin
       if (context === "comment-delete") {
         return "You can only delete your own comments.";
       }
+      if (context === "comment-report") {
+        return "You can't report your own comment.";
+      }
       if (context === "account-delete") {
         return "We couldn't confirm your recent sign-in. Please try again.";
       }
       return "You don't have permission to do that.";
     case 404:
-      if (context === "comment-delete") {
+      if (context === "comment-delete" || context === "comment-report") {
         return "That comment was already removed.";
       }
       return "Couldn't find that.";
     case 409:
       if (context === "username") {
         return "That username is already taken.";
+      }
+      if (context === "comment-report") {
+        return "You already reported this comment.";
       }
       return "That already exists.";
     case 429:

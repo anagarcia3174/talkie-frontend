@@ -1,5 +1,5 @@
 import { apiFetch } from "@/lib/api";
-import type { Comment, CommentWithUsername } from "@/lib/types";
+import type { Comment, CommentWithUsername, Report, ReportReason } from "@/lib/types";
 
 export const listMovieComments = (tmdbId: number) =>
   apiFetch<CommentWithUsername[]>(`/movies/${tmdbId}/comments`);
@@ -24,3 +24,9 @@ export const createComment = (input: CreateCommentInput) =>
 
 export const deleteComment = (commentId: string) =>
   apiFetch<void>(`/comments/${commentId}`, { method: "DELETE" });
+
+export const reportComment = (commentId: string, input: { reason: ReportReason; detail?: string }) =>
+  apiFetch<Report>(`/comments/${commentId}/reports`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
