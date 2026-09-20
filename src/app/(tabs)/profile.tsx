@@ -22,6 +22,7 @@ import { describeApiError } from "@/lib/api-errors";
 import { colors, fonts, shadow, spacing } from "@/theme/tokens";
 import { Button } from "@/components/Button";
 import { EyebrowLabel } from "@/components/EyebrowLabel";
+import { TmdbAttribution } from "@/components/TmdbAttribution";
 
 const PROVIDER_LABELS: Record<string, string> = {
   google: "Google",
@@ -110,6 +111,7 @@ export default function ProfileScreen() {
         ) : (
           <SignInView />
         )}
+        <TmdbAttribution />
       </ScrollView>
 
       {session && (
