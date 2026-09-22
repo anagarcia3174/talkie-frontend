@@ -1,6 +1,8 @@
 import { apiFetch } from "@/lib/api";
 import type { Comment, CommentWithUsername, Report, ReportReason } from "@/lib/types";
 
+export const MAX_COMMENT_LENGTH = 280;
+
 export const listMovieComments = (tmdbId: number) =>
   apiFetch<CommentWithUsername[]>(`/movies/${tmdbId}/comments`);
 

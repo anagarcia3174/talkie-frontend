@@ -14,6 +14,7 @@ export function CommentComposer({
   editable = true,
   requireValue = true,
   errorText = null,
+  maxLength,
 }: {
   label: string;
   time: string;
@@ -26,8 +27,10 @@ export function CommentComposer({
   editable?: boolean;
   requireValue?: boolean;
   errorText?: string | null;
+  maxLength?: number;
 }) {
   const disabled = isSubmitting || (requireValue && value.trim().length === 0);
+  const nearLimit = !!maxLength && value.length >= maxLength - 40;
 
   function handleChangeText(text: string) {
     if (text.endsWith("\n")) {
@@ -43,12 +46,18 @@ export function CommentComposer({
       <View style={styles.row}>
         <EyebrowLabel>{label}</EyebrowLabel>
         <Text style={styles.time}>{time}</Text>
+        {nearLimit && (
+          <Text style={styles.counter}>
+            {value.length}/{maxLength}
+          </Text>
+        )}
       </View>
       <TextInput
         multiline
         numberOfLines={3}
         value={value}
         onChangeText={handleChangeText}
+        maxLength={maxLength}
         placeholder="What happens at this moment?"
         placeholderTextColor={colors.textMuted}
         style={[styles.textarea, !editable && styles.textareaDisabled]}
@@ -74,6 +83,7 @@ const styles = StyleSheet.create({
   },
   row: { flexDirection: "row", flexWrap: "wrap", alignItems: "baseline", gap: 8 },
   time: { fontFamily: fonts.monoMedium, fontSize: 12, color: colors.accent },
+  counter: { fontFamily: fonts.monoMedium, fontSize: 11, color: colors.textMuted, marginLeft: "auto" },
   textarea: {
     width: "100%",
     minHeight: 84,

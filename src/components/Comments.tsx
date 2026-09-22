@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import { useAuth } from "@/hooks/use-auth";
 import { useMediaScrubber } from "@/hooks/use-media-scrubber";
 import {
+  MAX_COMMENT_LENGTH,
   createComment,
   deleteComment,
   listEpisodeComments,
@@ -242,6 +243,7 @@ export function Comments({
             editable={canComment}
             requireValue={canComment || isUpcoming}
             errorText={createError}
+            maxLength={MAX_COMMENT_LENGTH}
           />
         </>
       )}
