@@ -74,7 +74,6 @@ export default function ProfileScreen() {
       await deleteAccount();
       queryClient.clear();
     } catch (err) {
-      // A cancelled re-authentication returns null and shows no error.
       setDeleteError(
         err instanceof ApiError
           ? describeApiError(err, "account-delete")

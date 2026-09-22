@@ -1,15 +1,18 @@
+import { useEffect, useState } from "react";
 import {
   Pressable,
   StyleSheet,
   Text,
+  View,
   type StyleProp,
   type ViewStyle,
   type PressableProps,
 } from "react-native";
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, fonts } from "@/theme/tokens";
 import { TalkieHeader } from "@/components/TalkieHeader";
+import { hasSeenOnboarding } from "@/lib/onboarding";
 
 const TAB_BAR_CONTENT_HEIGHT = 56;
 const TAB_BAR_BOTTOM_PADDING = 22;
@@ -51,6 +54,19 @@ function TabBarButton({
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const bottomPad = Math.min(insets.bottom, TAB_BAR_BOTTOM_PADDING);
+
+  const [seenOnboarding, setSeenOnboarding] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    hasSeenOnboarding().then(setSeenOnboarding);
+  }, []);
+
+  if (seenOnboarding === null) {
+    return <View style={{ flex: 1, backgroundColor: colors.bgBase }} />;
+  }
+  if (!seenOnboarding) {
+    return <Redirect href="/onboarding" />;
+  }
 
   return (
     <Tabs
