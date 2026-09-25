@@ -75,3 +75,9 @@ export interface Profile {
   username: string | null;
   created_at: string;
 }
+
+export interface BlockedUser {
+  id: string;
+  username: string | null;
+  blocked_at: string;
+}

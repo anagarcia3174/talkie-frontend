@@ -6,6 +6,7 @@ export type ApiErrorContext =
   | "comment-create"
   | "comment-delete"
   | "comment-report"
+  | "user-block"
   | "account-delete";
 
 
@@ -29,6 +30,9 @@ export function describeApiError(err: unknown, context?: ApiErrorContext): strin
       if (context === "comment-create") {
         return "Couldn't post that comment. Try again.";
       }
+      if (context === "user-block") {
+        return "You can't block yourself.";
+      }
       return "That didn't go through. Please try again.";
     case 401:
       return "You need to be logged in for that.";
@@ -49,6 +53,9 @@ export function describeApiError(err: unknown, context?: ApiErrorContext): strin
     case 404:
       if (context === "comment-delete" || context === "comment-report") {
         return "That comment was already removed.";
+      }
+      if (context === "user-block") {
+        return "That user no longer exists.";
       }
       return "Couldn't find that.";
     case 409:

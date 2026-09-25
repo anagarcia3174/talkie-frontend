@@ -13,6 +13,7 @@ import {
   reportComment,
 } from "@/lib/comments";
 import { describeApiError } from "@/lib/api-errors";
+import { blockUser } from "@/lib/blocks";
 import { formatTime } from "@/lib/format-time";
 import { getMe } from "@/lib/profile";
 import { isUpcoming as isDateUpcoming } from "@/lib/release-date";
@@ -57,7 +58,9 @@ export function Comments({
   const canComment = signedIn && hasUsername && !isUpcoming;
 
   const queryKey =
-    mediaType === "movie" ? ["comments", "movie", tmdbId] : ["comments", "tv", tmdbId, season, episode];
+    mediaType === "movie"
+      ? ["comments", "movie", tmdbId, user?.id ?? null]
+      : ["comments", "tv", tmdbId, season, episode, user?.id ?? null];
 
   const { data: comments, isLoading, error } = useQuery({
     queryKey,
@@ -87,6 +90,15 @@ export function Comments({
     mutationFn: (id: string) => deleteComment(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey }),
     onError: (err) => Alert.alert("Couldn't delete comment", describeApiError(err, "comment-delete")),
+  });
+
+  const blockMutation = useMutation({
+    mutationFn: (userId: string) => blockUser(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments"] });
+      queryClient.invalidateQueries({ queryKey: ["blocks"] });
+    },
+    onError: (err) => Alert.alert("Couldn't block user", describeApiError(err, "user-block")),
   });
 
   const [reportTargetId, setReportTargetId] = useState<string | null>(null);
@@ -144,6 +156,19 @@ export function Comments({
       { text: "Cancel", style: "cancel" },
       { text: "Delete", style: "destructive", onPress: () => deleteMutation.mutate(comment.id) },
     ]);
+  }
+
+  function handleBlockPress(comment: CommentWithUsername) {
+    if (!user || comment.user_id === user.id) return;
+    const name = comment.username ? `@${comment.username}` : "this user";
+    Alert.alert(
+      `Block ${name}?`,
+      "You won't see their comments anymore. You can unblock them from your profile.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Block", style: "destructive", onPress: () => blockMutation.mutate(comment.user_id) },
+      ]
+    );
   }
 
   function submit() {
@@ -214,6 +239,7 @@ export function Comments({
                         user && c.user_id === user.id ? () => handleDeletePress(c) : undefined
                       }
                       onReport={user && c.user_id !== user.id ? () => openReport(c) : undefined}
+                      onBlock={user && c.user_id !== user.id ? () => handleBlockPress(c) : undefined}
                     >
                       {c.body}
                     </TimestampedQuote>

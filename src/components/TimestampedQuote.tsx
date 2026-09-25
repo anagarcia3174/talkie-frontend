@@ -9,6 +9,7 @@ export function TimestampedQuote({
   onPress,
   onDelete,
   onReport,
+  onBlock,
   children,
 }: {
   time: string;
@@ -17,6 +18,7 @@ export function TimestampedQuote({
   onPress?: () => void;
   onDelete?: () => void;
   onReport?: () => void;
+  onBlock?: () => void;
   children: string;
 }) {
   return (
@@ -43,6 +45,16 @@ export function TimestampedQuote({
           style={({ pressed }) => [styles.deleteButton, pressed && styles.deleteButtonPressed]}
         >
           <Ionicons name="flag-outline" size={16} color={colors.textMuted} />
+        </Pressable>
+      )}
+      {onBlock && (
+        <Pressable
+          onPress={onBlock}
+          hitSlop={8}
+          accessibilityLabel="Block user"
+          style={({ pressed }) => [styles.deleteButton, pressed && styles.deleteButtonPressed]}
+        >
+          <Ionicons name="ban-outline" size={16} color={colors.textMuted} />
         </Pressable>
       )}
     </View>
