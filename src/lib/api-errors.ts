@@ -33,6 +33,9 @@ export function describeApiError(err: unknown, context?: ApiErrorContext): strin
     case 401:
       return "You need to be logged in for that.";
     case 403:
+      if (err.message === "account suspended") {
+        return "Your account has been suspended for violating Talkie's guidelines.";
+      }
       if (context === "comment-delete") {
         return "You can only delete your own comments.";
       }
@@ -56,6 +59,11 @@ export function describeApiError(err: unknown, context?: ApiErrorContext): strin
         return "You already reported this comment.";
       }
       return "That already exists.";
+    case 422:
+      if (context === "username") {
+        return "That username isn't allowed. Please choose another.";
+      }
+      return "That comment contains language that isn't allowed on Talkie.";
     case 429:
       return "Too many attempts. Please wait a minute and try again.";
     case 502:
