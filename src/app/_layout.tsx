@@ -1,4 +1,5 @@
 import { Stack } from "expo-router";
+import * as Sentry from "@sentry/react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/hooks/use-auth";
@@ -20,9 +21,16 @@ import { useEffect } from "react";
 
 SplashScreen.preventAutoHideAsync();
 
+const sentryDsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
+Sentry.init({
+  dsn: sentryDsn,
+  enabled: !__DEV__ && !!sentryDsn,
+  sendDefaultPii: false,
+});
+
 const queryClient = new QueryClient();
 
-export default function RootLayout() {
+function RootLayout() {
   const [fontsLoaded] = useFonts({
     BigShouldersDisplay_900Black,
     SpaceGrotesk_400Regular,
@@ -57,3 +65,5 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default Sentry.wrap(RootLayout);

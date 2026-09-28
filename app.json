@@ -54,6 +54,14 @@
             "enableSceneSupport": true
           }
         }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "organization": "ana-garcia",
+          "project": "talkie-ios"
+        }
       ]
     ],
     "experiments": {
