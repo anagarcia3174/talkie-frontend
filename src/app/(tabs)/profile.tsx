@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Alert,
   Image,
   Platform,
   Pressable,
@@ -15,15 +14,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { useAuth } from "@/hooks/use-auth";
 import { signInWithApple, signInWithGoogle } from "@/lib/auth";
-import { ApiError } from "@/lib/api";
 import { describeAuthError } from "@/lib/auth-errors";
 import { getMe, updateUsername } from "@/lib/profile";
-import { listBlockedUsers, unblockUser } from "@/lib/blocks";
 import { describeApiError } from "@/lib/api-errors";
 import { colors, fonts, shadow, spacing } from "@/theme/tokens";
 import { Button } from "@/components/Button";
 import { EyebrowLabel } from "@/components/EyebrowLabel";
-import { TmdbAttribution } from "@/components/TmdbAttribution";
 
 const PROVIDER_LABELS: Record<string, string> = {
   google: "Google",
@@ -44,60 +40,10 @@ function formatProviders(providers: string[] | undefined): string | null {
 }
 
 export default function ProfileScreen() {
-  const { session, loading, logout, deleteAccount } = useAuth();
-  const queryClient = useQueryClient();
-  const [loggingOut, setLoggingOut] = useState(false);
-  const [logoutError, setLogoutError] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const { session, loading } = useAuth();
 
   if (loading) {
     return <SafeAreaView style={styles.page} edges={[]} />;
-  }
-
-
-  async function handleLogout() {
-    setLogoutError(null);
-    setLoggingOut(true);
-    try {
-      await logout();
-    } catch (err) {
-      setLogoutError(describeAuthError(err) ?? "Couldn't log out. Try again.");
-    } finally {
-      setLoggingOut(false);
-    }
-  }
-
-  async function handleDeleteAccount() {
-    setDeleteError(null);
-    setDeleting(true);
-    try {
-      await deleteAccount();
-      queryClient.clear();
-    } catch (err) {
-      setDeleteError(
-        err instanceof ApiError
-          ? describeApiError(err, "account-delete")
-          : describeAuthError(err),
-      );
-    } finally {
-      setDeleting(false);
-    }
-  }
-
-  function confirmDeleteAccount() {
-    Alert.alert(
-      "Delete account?",
-      "This permanently deletes your account, username, and all of your comments. You'll be asked to sign in again to confirm. This can't be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: handleDeleteAccount,
-        },
-      ],
-    );
   }
 
   return (
@@ -111,36 +57,7 @@ export default function ProfileScreen() {
         ) : (
           <SignInView />
         )}
-        <TmdbAttribution />
       </ScrollView>
-
-      {session && (
-        <View style={styles.footer}>
-          {logoutError && <Text style={styles.logoutError}>{logoutError}</Text>}
-          <Pressable
-            onPress={handleLogout}
-            disabled={loggingOut}
-            style={[styles.logoutButton, loggingOut && styles.disabledButton]}
-          >
-            <Text style={styles.logoutLabel}>
-              {loggingOut ? "Logging out…" : "Log out"}
-            </Text>
-          </Pressable>
-          {deleteError && <Text style={styles.deleteError}>{deleteError}</Text>}
-          <Pressable
-            onPress={confirmDeleteAccount}
-            disabled={deleting || loggingOut}
-            style={[
-              styles.deleteButton,
-              (deleting || loggingOut) && styles.disabledButton,
-            ]}
-          >
-            <Text style={styles.deleteLabel}>
-              {deleting ? "Deleting account…" : "Delete account"}
-            </Text>
-          </Pressable>
-        </View>
-      )}
     </SafeAreaView>
   );
 }
@@ -328,57 +245,6 @@ function AccountView({
           )}
         </View>
       </View>
-
-      <BlockedUsersSection />
-    </View>
-  );
-}
-
-function BlockedUsersSection() {
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-
-  const { data: blocked, isLoading, error } = useQuery({
-    queryKey: ["blocks", user?.id ?? null],
-    queryFn: listBlockedUsers,
-    enabled: !!user,
-  });
-
-  const unblockMutation = useMutation({
-    mutationFn: (userId: string) => unblockUser(userId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["blocks"] });
-      queryClient.invalidateQueries({ queryKey: ["comments"] });
-    },
-    onError: (err) => Alert.alert("Couldn't unblock user", describeApiError(err)),
-  });
-
-  return (
-    <View style={styles.blockedCard}>
-      <EyebrowLabel>Blocked users</EyebrowLabel>
-      {isLoading ? (
-        <Text style={styles.blockedEmpty}>Loading…</Text>
-      ) : error ? (
-        <Text style={styles.errorText}>{describeApiError(error)}</Text>
-      ) : !blocked || blocked.length === 0 ? (
-        <Text style={styles.blockedEmpty}>You haven't blocked anyone.</Text>
-      ) : (
-        blocked.map((b) => (
-          <View key={b.id} style={styles.blockedRow}>
-            <Text style={styles.blockedName} numberOfLines={1}>
-              {b.username ?? "unknown"}
-            </Text>
-            <Pressable
-              onPress={() => unblockMutation.mutate(b.id)}
-              disabled={unblockMutation.isPending}
-              style={[styles.editButton, unblockMutation.isPending && styles.disabledButton]}
-              hitSlop={8}
-            >
-              <Text style={styles.editButtonLabel}>Unblock</Text>
-            </Pressable>
-          </View>
-        ))
-      )}
     </View>
   );
 }
@@ -513,76 +379,4 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   errorText: { fontFamily: fonts.body, fontSize: 13, color: colors.accent },
-
-  blockedCard: {
-    borderWidth: 1,
-    borderColor: colors.divider,
-    backgroundColor: colors.bgElevated,
-    padding: spacing.lg,
-    gap: spacing.md,
-  },
-  blockedEmpty: { fontFamily: fonts.body, fontSize: 14, color: colors.textMuted },
-  blockedRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: spacing.md,
-  },
-  blockedName: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 16,
-    color: colors.textPrimary,
-    flexShrink: 1,
-  },
-
-  footer: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.lg,
-  },
-  logoutError: {
-    fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.accent,
-    marginBottom: spacing.sm,
-    textAlign: "center",
-  },
-  logoutButton: {
-    height: 56,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: colors.dividerStrong,
-    backgroundColor: "transparent",
-  },
-  deleteError: {
-    fontFamily: fonts.body,
-    fontSize: 13,
-    color: colors.accent,
-    marginTop: spacing.sm,
-    textAlign: "center",
-  },
-  deleteButton: {
-    height: 56,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: colors.accent,
-    backgroundColor: "transparent",
-    marginTop: spacing.sm,
-  },
-  deleteLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 13,
-    letterSpacing: 1.56,
-    textTransform: "uppercase",
-    color: colors.accent,
-  },
-  logoutLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 13,
-    letterSpacing: 1.56,
-    textTransform: "uppercase",
-    color: colors.textPrimary,
-  },
 });

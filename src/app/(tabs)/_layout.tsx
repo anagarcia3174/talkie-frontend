@@ -8,10 +8,10 @@ import {
   type ViewStyle,
   type PressableProps,
 } from "react-native";
-import { Redirect, Tabs } from "expo-router";
+import { Redirect, Tabs, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, fonts } from "@/theme/tokens";
-import { TalkieHeader } from "@/components/TalkieHeader";
+import { HeaderAction, TalkieHeader } from "@/components/TalkieHeader";
 import { hasSeenOnboarding } from "@/lib/onboarding";
 
 const TAB_BAR_CONTENT_HEIGHT = 56;
@@ -53,6 +53,7 @@ function TabBarButton({
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const bottomPad = Math.min(insets.bottom, TAB_BAR_BOTTOM_PADDING);
 
   const [seenOnboarding, setSeenOnboarding] = useState<boolean | null>(null);
@@ -114,7 +115,12 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: "Profile",
-          header: () => <TalkieHeader title="Profile" />,
+          header: () => (
+            <TalkieHeader
+              title="Profile"
+              right={<HeaderAction label="Settings" onPress={() => router.push("/settings")} />}
+            />
+          ),
           tabBarButton: (props: any) => (
             <TabBarButton
               {...props}

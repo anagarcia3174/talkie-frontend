@@ -163,7 +163,7 @@ export function Comments({
     const name = comment.username ? `@${comment.username}` : "this user";
     Alert.alert(
       `Block ${name}?`,
-      "You won't see their comments anymore. You can unblock them from your profile.",
+      "You won't see their comments anymore. You can unblock them in Settings.",
       [
         { text: "Cancel", style: "cancel" },
         { text: "Block", style: "destructive", onPress: () => blockMutation.mutate(comment.user_id) },

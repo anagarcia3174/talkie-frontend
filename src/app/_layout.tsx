@@ -50,6 +50,7 @@ export default function RootLayout() {
             />
             <Stack.Screen name="movie/[tmdbId]" options={{ headerShown: false}} />
             <Stack.Screen name="tv/[tmdbId]" options={{ headerShown: false}} />
+            <Stack.Screen name="settings" options={{ headerShown: false }} />
           </Stack>
         </QueryClientProvider>
       </AuthProvider>
