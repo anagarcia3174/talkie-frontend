@@ -16,3 +16,5 @@ export const deleteAccount = (appleAuthorizationCode?: string) =>
       apple_authorization_code: appleAuthorizationCode ?? "",
     }),
   });
+
+export const acceptTerms = () => apiFetch<Profile>("/me/terms", { method: "POST" });

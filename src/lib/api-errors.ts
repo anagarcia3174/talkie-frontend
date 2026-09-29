@@ -40,6 +40,9 @@ export function describeApiError(err: unknown, context?: ApiErrorContext): strin
       if (err.message === "account suspended") {
         return "Your account has been suspended for violating Talkie's guidelines.";
       }
+      if (err.message === "terms not accepted") {
+        return "Please agree to the Terms of Service before posting.";
+      }
       if (context === "comment-delete") {
         return "You can only delete your own comments.";
       }

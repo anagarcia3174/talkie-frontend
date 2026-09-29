@@ -5,6 +5,8 @@ import * as WebBrowser from "expo-web-browser";
 
 export const SUPPORT_EMAIL = "support@gettalkie.app";
 export const SUPPORT_URL = "https://gettalkie.app/support";
+export const TERMS_URL = "https://gettalkie.app/terms";
+export const PRIVACY_URL = "https://gettalkie.app/privacy";
 
 export const APP_VERSION = Constants.expoConfig?.version ?? "unknown";
 
@@ -24,10 +26,15 @@ export async function openSupportEmail() {
   }
 }
 
-export async function openHelpCenter() {
+/** Opens a gettalkie.app page in the in-app browser. */
+export async function openWebPage(url: string) {
   try {
-    await WebBrowser.openBrowserAsync(SUPPORT_URL);
+    await WebBrowser.openBrowserAsync(url);
   } catch {
-    Alert.alert("Couldn't open help", `Visit ${SUPPORT_URL}`);
+    Alert.alert("Couldn't open page", `Visit ${url}`);
   }
 }
+
+export const openHelpCenter = () => openWebPage(SUPPORT_URL);
+export const openTerms = () => openWebPage(TERMS_URL);
+export const openPrivacyPolicy = () => openWebPage(PRIVACY_URL);

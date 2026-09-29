@@ -15,8 +15,9 @@ import {
 import { describeApiError } from "@/lib/api-errors";
 import { blockUser } from "@/lib/blocks";
 import { formatTime } from "@/lib/format-time";
-import { getMe } from "@/lib/profile";
+import { acceptTerms, getMe } from "@/lib/profile";
 import { isUpcoming as isDateUpcoming } from "@/lib/release-date";
+import { openTerms } from "@/lib/support";
 import type { CommentWithUsername, ReportReason } from "@/lib/types";
 import { colors, fonts, spacing } from "@/theme/tokens";
 import { CommentComposer } from "./CommentComposer";
@@ -54,8 +55,28 @@ export function Comments({
 
   const { data: profile } = useQuery({ queryKey: ["me"], queryFn: getMe, enabled: signedIn });
   const hasUsername = !!profile?.username;
+  // Accounts created before the Terms gate have a username but haven't agreed yet.
+  const needsTerms = signedIn && hasUsername && profile?.terms_accepted === false;
   const isUpcoming = isDateUpcoming(releaseDate);
-  const canComment = signedIn && hasUsername && !isUpcoming;
+  const canComment = signedIn && hasUsername && !needsTerms && !isUpcoming;
+
+  const acceptTermsMutation = useMutation({
+    mutationFn: acceptTerms,
+    onSuccess: (updated) => queryClient.setQueryData(["me"], updated),
+    onError: (err) => Alert.alert("Couldn't save your agreement", describeApiError(err)),
+  });
+
+  function confirmTerms() {
+    Alert.alert(
+      "Terms of Service",
+      "To post on Talkie, you agree to the Terms of Service and Privacy Policy. Talkie has zero tolerance for objectionable content or abusive users.",
+      [
+        { text: "Read Terms", onPress: openTerms },
+        { text: "Cancel", style: "cancel" },
+        { text: "I Agree", onPress: () => acceptTermsMutation.mutate() },
+      ],
+    );
+  }
 
   const queryKey =
     mediaType === "movie"
@@ -179,6 +200,10 @@ export function Comments({
   }
 
   function handleComposerSubmit() {
+    if (needsTerms && !isUpcoming) {
+      confirmTerms();
+      return;
+    }
     if (!canComment) {
       router.push("/profile");
       return;
@@ -262,7 +287,9 @@ export function Comments({
                   ? "Log in to join the conversation"
                   : !hasUsername
                     ? "Choose a username to comment"
-                    : "Post comment"
+                    : needsTerms
+                      ? "Agree to the Terms to comment"
+                      : "Post comment"
             }
             pendingLabel="Posting…"
             isSubmitting={canComment && createMutation.isPending}

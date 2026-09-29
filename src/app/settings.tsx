@@ -7,7 +7,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { ApiError } from "@/lib/api";
 import { describeApiError } from "@/lib/api-errors";
 import { describeAuthError } from "@/lib/auth-errors";
-import { APP_VERSION, openHelpCenter, openSupportEmail } from "@/lib/support";
+import {
+  APP_VERSION,
+  openHelpCenter,
+  openPrivacyPolicy,
+  openSupportEmail,
+  openTerms,
+} from "@/lib/support";
 import { colors, fonts, spacing } from "@/theme/tokens";
 import { BlockedUsersSection } from "@/components/BlockedUsersSection";
 import { DetailBackLink } from "@/components/DetailBackLink";
@@ -87,6 +93,12 @@ export default function SettingsScreen() {
           <EyebrowLabel>Support</EyebrowLabel>
           <SettingsRow label="Contact support" hint="Email" onPress={openSupportEmail} />
           <SettingsRow label="Help center" hint="Web" onPress={openHelpCenter} />
+        </View>
+
+        <View style={styles.card}>
+          <EyebrowLabel>Legal</EyebrowLabel>
+          <SettingsRow label="Terms of Service" hint="Web" onPress={openTerms} />
+          <SettingsRow label="Privacy Policy" hint="Web" onPress={openPrivacyPolicy} />
         </View>
 
         <View style={styles.card}>

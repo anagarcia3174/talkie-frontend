@@ -15,11 +15,12 @@ import * as AppleAuthentication from "expo-apple-authentication";
 import { useAuth } from "@/hooks/use-auth";
 import { signInWithApple, signInWithGoogle } from "@/lib/auth";
 import { describeAuthError } from "@/lib/auth-errors";
-import { getMe, updateUsername } from "@/lib/profile";
+import { acceptTerms, getMe, updateUsername } from "@/lib/profile";
 import { describeApiError } from "@/lib/api-errors";
 import { colors, fonts, shadow, spacing } from "@/theme/tokens";
 import { Button } from "@/components/Button";
 import { EyebrowLabel } from "@/components/EyebrowLabel";
+import { TermsCheckbox } from "@/components/TermsCheckbox";
 
 const PROVIDER_LABELS: Record<string, string> = {
   google: "Google",
@@ -163,9 +164,18 @@ function AccountView({
   }, [profile?.username]);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const showUsernameEditor = !hasUsername || isEditingUsername;
+  // New accounts agree to the Terms while choosing a username; accounts that
+  // already have one are asked from the comment composer instead.
+  const needsTermsHere = !hasUsername && !profile?.terms_accepted;
+  const [termsChecked, setTermsChecked] = useState(false);
 
   const updateUsernameMutation = useMutation({
-    mutationFn: (username: string) => updateUsername(username),
+    mutationFn: async (username: string) => {
+      if (needsTermsHere) {
+        queryClient.setQueryData(["me"], await acceptTerms());
+      }
+      return updateUsername(username);
+    },
     onSuccess: (updated) => {
       queryClient.setQueryData(["me"], updated);
       setIsEditingUsername(false);
@@ -207,6 +217,9 @@ function AccountView({
                 autoCorrect={false}
                 autoFocus={hasUsername}
               />
+              {needsTermsHere && (
+                <TermsCheckbox checked={termsChecked} onChange={setTermsChecked} />
+              )}
               {updateUsernameMutation.isError && (
                 <Text style={styles.errorText}>
                   {describeApiError(updateUsernameMutation.error, "username")}
@@ -215,7 +228,11 @@ function AccountView({
               <View style={styles.usernameActions}>
                 <Button
                   onPress={() => updateUsernameMutation.mutate(trimmed)}
-                  disabled={unchanged || updateUsernameMutation.isPending}
+                  disabled={
+                    unchanged ||
+                    (needsTermsHere && !termsChecked) ||
+                    updateUsernameMutation.isPending
+                  }
                 >
                   {updateUsernameMutation.isPending ? "Saving…" : "Save username"}
                 </Button>
