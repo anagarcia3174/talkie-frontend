@@ -1,14 +1,13 @@
 {
   "expo": {
-    "name": "talkie_frontend",
+    "name": "Talkie",
     "slug": "talkie_frontend",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/app-icon.png",
     "scheme": "gettalkie",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
       "bundleIdentifier": "app.gettalkie",
       "usesAppleSignIn": true,
       "infoPlist": {
@@ -34,8 +33,8 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
+          "backgroundColor": "#1d1c19",
+          "image": "./assets/images/splash-talkie.png",
           "imageWidth": 76
         }
       ],
