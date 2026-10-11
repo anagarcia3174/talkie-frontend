@@ -1,56 +1,96 @@
-# Welcome to your Expo app 👋
+# Talkie (iOS app)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+The React Native / Expo client for **Talkie**, an app for leaving and reading
+comments tied to an exact moment in a movie or TV episode.
 
-## Get started
+Instead of a review or one long discussion thread, every comment is anchored to
+a timestamp: "at 1:12:40, *that* line." You scrub to where you are in the movie,
+and only the comments from that moment show up, so you never see spoilers from
+later on.
 
-1. Install dependencies
+- **Website:** [gettalkie.app](https://gettalkie.app)
+- **Backend API (Go):** [talkie-backend](https://github.com/anagarcia3174/talkie-backend)
 
-   ```bash
-   npm install
-   ```
+---
 
-2. Start the app
+## Features
 
-   ```bash
-   npx expo start
-   ```
+- **Timestamp scrubber.** A draggable timeline sized to the movie's or episode's
+  runtime, with play/pause and 0.5×–2× speed so it can follow along while you
+  watch. Existing comments show as marks on the track, and dragging near a mark
+  snaps to it.
+- **Spoiler-free comment feed.** Only comments from the last 10 seconds before
+  your current position are shown. Tapping a comment jumps the scrubber to its
+  timestamp.
+- **Post at the current moment.** The composer stamps your comment with the
+  scrubber position (280-character limit).
+- **Movies and TV.** One page per title. TV shows get a season/episode picker
+  on that same page, and comments are kept per episode.
+- **Search and trending,** powered by [TMDB](https://www.themoviedb.org/).
+- **Sign in with Apple or Google** through Supabase Auth, then pick a username
+  and accept the Terms before posting.
+- **Safety tools required for App Store user-generated content:** report a
+  comment, block users (and manage blocked users in Settings), and delete your
+  account in the app.
 
-In the output, you'll find options to open the app in a
+## Tech stack
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+| Concern | Choice |
+|---|---|
+| Framework | [Expo](https://expo.dev) SDK 57, React Native 0.86, React 19 (React Compiler enabled) |
+| Language | TypeScript |
+| Navigation | [Expo Router](https://docs.expo.dev/router/introduction/) (file-based, typed routes) |
+| Server state | [TanStack Query](https://tanstack.com/query) |
+| Auth | [Supabase Auth](https://supabase.com/docs/guides/auth) with native Apple and Google sign-in |
+| Session storage | AES-encrypted session in AsyncStorage; the encryption key lives in the iOS Keychain via `expo-secure-store` |
+| Gestures | `react-native-gesture-handler` (scrubber) |
+| Crash reporting | [Sentry](https://sentry.io) (no PII, disabled in development) |
+| Builds and release | [EAS Build / Submit](https://docs.expo.dev/eas/) |
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## How it fits together
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+ Talkie app (this repo)
+   │  Supabase Auth: Apple / Google sign-in → JWT
+   │
+   │  HTTPS + Bearer JWT
+   ▼
+ talkie-backend (Go API on Fly.io)
+   ├── Supabase Postgres: profiles, comments, reports, blocks (RLS enabled)
+   └── TMDB: movie, show, episode, and search data
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+The app never talks to the database directly. Supabase is used for sign-in
+only, and every data request goes through the Go API in `src/lib/api.ts`, which
+attaches the current session's access token. The API verifies the token,
+enforces moderation (content filter, rate limits, bans, auto-hiding reported
+comments), and proxies TMDB so the TMDB key never ships in the app.
 
-### Other setup steps
+## Project structure
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```
+src/
+├── app/                 # Expo Router screens
+│   ├── (tabs)/          # Home (trending), Search, Profile
+│   ├── movie/[tmdbId]   # Movie page: details, scrubber, comments
+│   ├── tv/[tmdbId]      # Show page with season/episode picker
+│   ├── onboarding.tsx
+│   └── settings.tsx     # Blocked users, legal links, delete account
+├── components/          # Scrubber, Comments, CommentComposer, ReportSheet, skeletons, …
+├── hooks/
+│   ├── use-auth.tsx           # Auth context: session, sign-in/out, profile
+│   └── use-media-scrubber.ts  # Position, play/pause, and speed state
+├── lib/                 # API client, Supabase client, typed endpoint helpers
+└── theme/tokens.ts      # Colors, fonts, spacing
+```
 
-## Learn more
+## Attribution
 
-To learn more about developing your project with Expo, look at the following resources:
+This product uses the TMDB API but is not endorsed or certified by TMDB.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## License
 
-## Join the community
+Copyright © 2026 Ana Garcia. All rights reserved.
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+This repository is public for portfolio purposes only. No license is granted to
+use, copy, modify, or distribute this code. See [LICENSE](LICENSE).
